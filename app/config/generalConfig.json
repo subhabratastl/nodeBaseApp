@@ -1,0 +1,8 @@
+{
+    "stl_mail"                  : "subhabratastl@gmail.com",
+    "stl_mail_port"             : "465",
+    "stl_mail_host"             : "smtp.gmail.com",
+    "stl_mail_user"             : "subhabratastl@gmail.com",
+    "stl_mail_pass"             : "pyaiuwdulyjblwfh",
+    "stl_secure"                :"false"
+}
