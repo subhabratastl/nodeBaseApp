@@ -34,24 +34,50 @@ var generalController=module.exports={
     //     }
 
     // },
+    updateProfileDetails: async function (req, res, next) {
 
-    updateProfileDetails:async function(req,res,next){
-        
         console.log('update profile....');
-        try{
-            var params=req.body;
-            params.myUserCode=req.userCode;
-            let result= await generalModel.UpdateProfileDetails(params); 
-            let dataResponse={
-                status:"000",
-                message:"Updated profile details Successfully",
-                responseData:{
-                    data:result
+        try {
+            var params = req.body;
+            params.myUserCode = req.userCode;
+
+            console.log('update profile....', params);
+            if ('updateProfilePhoto' in params) {
+                console.log('if for profile..');
+                let resultData = await generalModel.UpdateProfilePhoto(params);
+                let result={};
+                let finalResult;
+                if(resultData.affectedRows==1 || resultData.affectedRows==0){
+                    console.log("if case affectedRows...")
+                     result = await generalModel.getProfile(params);
+                     finalResult={
+                         "user_name":result[0].user_name,
+                         "profile_photo":result[0].profile_photo
+                     }
+                     
                 }
-              }
-            res.status(200).send(dataResponse)
-        }catch(err){
-            console.log('Update Profile..',err);
+                console.log('resulttttt...',finalResult);
+                let dataResponse = {
+                    status: "000",
+                    message: "Updated profile details Successfully",
+                    responseData: finalResult
+                }
+                res.status(200).send(dataResponse)
+            } else {
+                console.log('else for profile..@@@@@@@@@@@@@@@2')
+                let result= await generalModel.UpdateProfileDetails(params);
+                //console.log() 
+                let dataResponse={
+                    status:"000",
+                    message:"Updated profile details Successfully",
+                    responseData:{}
+                  }
+                res.status(200).send(dataResponse)
+
+            }
+
+        } catch (err) {
+            console.log('Update Profile..', err);
         }
     },
 
@@ -62,10 +88,8 @@ var generalController=module.exports={
             let result=await generalModel.getProfile(params);
             let dataResponse={
                 status:"000",
-                message:"get ALL User List",
-                responseData:{
-                    data:result
-                }
+                message:"get User Data",
+                responseData:Object.assign({}, ...result)
             }
             res.status(200).send(dataResponse);
         }catch(err){
@@ -81,7 +105,6 @@ var generalController=module.exports={
             // console.log('passweorddddd',passwordMatch[0].password_match);
             // if(params.oldPassword==)
             console.log('password... entry');
-            if(params.newPassword==params.confirmPassword){
                 let passwordMatch=await generalModel.getPassword(params);
                 if(passwordMatch){
                     let passwordUpdate=await generalModel.passwordUpdate(params); 
@@ -96,15 +119,9 @@ var generalController=module.exports={
                         status:false,
                         message:"Old password not match with our database"
                       }
-                    res.status(422).send(dataResponse)
+                    res.status(200).send(dataResponse)
                     }
-            }else{
-                let dataResponse={
-                    status:false,
-                    message:"Validation errors"
-                  }
-                res.status(422).send(dataResponse)
-            }
+            
         }catch(err){
             console.log("Password change..",err);
         }
@@ -126,7 +143,7 @@ var generalController=module.exports={
                 let dataResponse={
                     status:"000",
                     message:"OTP Send to your register Email Id",
-                    responseData:{data:sendEmail}
+                    responseData:Object.assign({}, ...sendEmail)
                 }
                 res.status(200).send(dataResponse)
             }else if (params.op_type=='VERIFY_OTP'){
@@ -151,7 +168,6 @@ var generalController=module.exports={
                 }
             }else if (params.op_type=='PASSWORD_CHANGE'){
                 console.log('params....',params);
-                if(params.newPassword==params.confirmPassword){
                     await generalModel.passwordUpdate(params)
                     let dataResponse={
                         status:"000",
@@ -159,13 +175,6 @@ var generalController=module.exports={
                         responseData:{}
                     }
                     res.status(200).send(dataResponse)
-                }else{
-                    let dataResponse={
-                        status:false,
-                        message:"Validation errors"
-                      }
-                    res.status(422).send(dataResponse)
-                }
             }
         }catch(err){
             console.log('forget password.. ',err);
@@ -186,16 +195,18 @@ var generalController=module.exports={
               transporter.sendMail(mailOptions, function(error, info) {
                 if (error) {
                   console.log('Error:', error);
+                  return {success:false,data:'OTP not send'}
                 } else {
                   console.log('Email sent:', info.response);
+                  return result;
                 }
               });
             console.log('email get from DB..',result);
-            return result;
         }catch(err){
             console.log('get data for email',err)
         }
        
-    }
+    },
+    
 
 }

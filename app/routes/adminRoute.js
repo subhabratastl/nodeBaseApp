@@ -14,14 +14,23 @@ const router= require("express").Router();
 //   app.use('/api/auth', router);
 
   router.post(["/signin","/adminApi/signin"],controller.siginUser);
-  router.post(["/createUser","/adminApi/creatUser"],verifyToken,controller.intialUser);
+  router.post(["/userSetup","/adminApi/userSetup"],verifyToken,controller.intialUser);
   //router.get("/userDetails",verifyToken,controller.getUserDetails);
   router.post(["/getUserList","/adminApi/getUserList"],verifyToken,controller.intialUser);
-  router.post(["/updateUserDetails","/adminApi/updateUserDetails"],verifyToken,controller.intialUser);
+  //router.post(["/updateUserDetails","/adminApi/updateUserDetails"],verifyToken,controller.intialUser);
   router.get(["/signout","/adminApi/signout"],verifyToken,controller.signout);
 
   router.get(["/getAllRole","/adminApi/getAllRole"],verifyToken,controller.getAllRoles);
   router.post(["/roleSetup","/adminApi/roleSetup"],verifyToken,controller.initialRole);
+  router.post(["/updateUserStatus","/adminApi/updateUserStatus"],verifyToken,controller.activeDeactiveUser);
+  router.post(["/updateRoleStatus","/adminApi/updateRoleStatus"],verifyToken,controller.activeDeactiveRole);
+
+  router.get(["/getUsersCount","/adminApi/getUsersCount"],verifyToken,controller.getUsersCount);
+  router.get(["/getGroupUsersCount","/adminApi/getGroupUsersCount"],verifyToken,controller.getGroupWiseUsersCount);
+  router.post(["/resource","/adminApi/resource"],verifyToken,controller.initialResource);
+  router.get(["/resource","/adminApi/resource"],verifyToken,controller.initialResource);
+  
+
 
   module.exports=router;
 //};

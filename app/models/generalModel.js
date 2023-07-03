@@ -24,6 +24,25 @@ var generalModel=module.exports ={
         }
       },
 
+      UpdateProfilePhoto: async function (params) {
+        console.log("profile model......!!!!!!!!!!!!!!!!!",params)
+        /* user_code,display_name,email_id,mobile_no,address,profile_photo,created_by*/
+        // if (params.profilePhoto == "") {
+        //   params.profilePhoto = null
+        // }
+        const query = 'UPDATE user_details SET profile_photo=? Where user_code=?';
+    
+        try {
+          const [results] = await sequelize.query(query, {
+            replacements: [params.updateProfilePhoto,params.myUserCode] // Provide values for the placeholders
+          });
+          console.log(results); // Display the query results
+          return results;
+        } catch (error) {
+          console.error('Error executing query:', error);
+        }
+      },
+
       getProfile:async function(params){
         const query = 'SELECT ud.display_name,ud.email_id,ud.mobile_no,ud.address,ud.profile_photo,um.user_name,rm.role_name FROM user_details ud INNER JOIN user_masters um ON (ud.user_code=um.user_code) INNER JOIN role_masters rm ON (rm.role_code=um.fk_role_code) Where ud.user_code=?';
     
@@ -106,7 +125,7 @@ var generalModel=module.exports ={
         }catch(err){
           console.log('Verify OTP error',err);
         }
-      }
+      },
 
-
+     
 }

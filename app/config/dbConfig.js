@@ -1,8 +1,8 @@
 module.exports={
-    HOST:"192.168.0.108",
-    USER:"root",
-    PASSWORD:"",
-    DB:"admin_project",
+    HOST:"localhost",
+    USER:"subhabrata",
+    PASSWORD:"Stlmysql#1234",
+    DB:"stl_node_db",
     dialect: "mysql",
     //dialectOptions:{useUTC:false},
     timezone:"+05:30",

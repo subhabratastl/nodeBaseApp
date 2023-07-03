@@ -11,6 +11,6 @@ const router= require("express").Router();
   router.post(["/updateProfileDetails","/generalApi/updateProfileDetails"],verifyToken,controller.updateProfileDetails);
   router.post(["/passwordUpdate","/generalApi/passwordUpdate"],verifyToken,controller.updatePassword);
   router.get(["/getProfileDetails","/generalApi/getProfileDetails"],verifyToken,controller.getProfileDetails);
-  router.post(["/forgetPassword","/generalApi/forgetPassword"],controller.forgetPaswrd)
-
+  router.post(["/forgetPassword","/generalApi/forgetPassword"],controller.forgetPaswrd);
+  
   module.exports=router;
