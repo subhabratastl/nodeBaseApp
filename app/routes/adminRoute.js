@@ -30,9 +30,7 @@ const router= require("express").Router();
   router.post(["/resource","/adminApi/resource"],verifyToken,controller.initialResource);
   router.get(["/resource","/adminApi/resource"],verifyToken,controller.initialResource);
 
-  router.get(["/subha","/adminApi/subha"],controller.roleWiseAllMenu);
-
-  router.post(["/menuVsRole","/adminApi/menuVsRole"],verifyToken,controller.initalMenuVsRole);
+ router.post(["/menuVsRole","/adminApi/menuVsRole"],verifyToken,controller.initalMenuVsRole);
   
   
   module.exports=router;

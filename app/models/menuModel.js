@@ -24,7 +24,7 @@ var menuModel=module.exports ={
             
             //console.log('menu modellll', params);
             let ofset;
-            let query = "select a.*,ifnull(b.menu_name,0) as parent_name from menu_master a left join (select menu_name,id from menu_master  WHERE parent_id='#') b on b.id=a.parent_id and a.parent_id!='#' ORDER BY a.menu_order";
+            let query = "select a.*,rm.resource_name,ifnull(b.menu_name,0) as parent_name from menu_master a left join (select menu_name,id from menu_master  WHERE parent_id=0) b on b.id=a.parent_id and a.parent_id!=0 left join resource_master rm ON (rm.resource_code=a.resource_code) ORDER BY a.menu_order";
             if(('start' in params) && ('length' in params)){
                 ofset = ((params.start - 1) * params.length);
                 query += ' LIMIT ? OFFSET ?';

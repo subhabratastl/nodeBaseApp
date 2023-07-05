@@ -360,9 +360,9 @@ var adminModel = module.exports = {
 
   addMenuVsRoleModel: async function (params) {
     try {
-      let query = 'INSERT INTO menu_vs_role (role_code,menu_code,alias_menu_name,created_by) VALUES (?,?,?,?)';
+      let query = 'INSERT INTO menu_vs_role (role_code,menu_code,alias_menu_name,created_by,record_status) VALUES (?,?,?,?,?)';
       const [results] = await sequelize.query(query, {
-        replacements: [params.roleCode, params.menuCode, params.aliasMenuName, params.myUserCode]
+        replacements: [params.roleCode, params.menuCode, params.aliasMenuName, params.myUserCode,params.recordStatus]
       });
       return { success: true, message: "Data Add Successfully" };
     } catch (err) {
@@ -385,18 +385,39 @@ var adminModel = module.exports = {
     }
   },
 
-  getMenuVsRoleModel: async function (params) {
+  getRoleVsMenuModel: async function (params) {
     try {
-      let query = 'SELECT mvr.role_code AS roleCode,rms.role_Name AS roleName,mvr.menu_code AS menuCode,mvr.alias_menu_name AS aliasMenuName,mvr.record_status AS recordStatus FROM menu_vs_role mvr INNER JOIN role_masters rms ON (rms.role_code=mvr.role_code) ';
-      queru += 'WHERE mvr.menu_code=? ';
+      let query = 'SELECT mvr.id,mvr.role_code AS roleCode,mvr.menu_code AS menuCode,mm.menu_name AS menuName,mvr.alias_menu_name AS aliasMenuName,mvr.record_status AS recordStatus FROM menu_vs_role mvr ';
+      query += ' Left join menu_master mm ON (mm.id=mvr.menu_code)';
+      query += 'WHERE mvr.role_code=? ';
       query += 'AND mvr.record_status NOT IN (2) ORDER BY mvr.id ';
       const [results] = await sequelize.query(query, {
-        replacements: [params.menuCode]
+        replacements: [params.roleCode]
       });
       return { success: true, message: 'Data Fetching Successfully', data: results };
     } catch (err) {
       console.log("Get MenuVsRole ::", err);
       return { success: false, message: 'Data not fetching due to server issue' };
+    }
+  },
+
+  updateMenuVsRoleModel: async function (params) {
+    try {
+      let status;
+      if(params.recordStatus)
+      {
+        status=1;
+      }else{
+        status=0;
+      }
+      const query = "UPDATE menu_vs_role SET role_code=?,menu_code=?,alias_menu_name=?,record_status=?,updated_by=? WHERE id = ?";
+      const [results] = await sequelize.query(query, {
+        replacements: [params.roleCode, params.menuCode, params.aliasMenuName, status, params.myUserCode, params.menuId]
+      });
+      return { success: true, message: "Data Update Successfully" };
+    } catch (err) {
+      console.error('Error executing query:', error);
+      return { success: false, message: 'Data do not updated due to server issue' };
     }
   },
 

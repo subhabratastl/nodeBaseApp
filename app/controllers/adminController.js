@@ -517,7 +517,7 @@ var adminController= module.exports ={
 
     getMenuVsRole:async function (req,res,next,params){
         try{
-            let result=await adminModel.getMenuVsRoleModel(params);
+            let result=await adminModel.getRoleVsMenuModel(params);
             if(result.success){
                 let dataResponse={
                     status:"000",
@@ -537,6 +537,31 @@ var adminController= module.exports ={
             console.log("getMenuVsRole ::",err)
         }
     },
+
+    updateMenuVsRole:async function (req,res,next,params){
+        try{
+            console.log('updateMenuVsRole ::::',params)
+            let result=await adminModel.updateMenuVsRoleModel(params);
+            if(result.success){
+                let dataResponse={
+                    status:"000",
+                    message:result.message,
+                    responseData:{}
+                  }
+                res.status(200).send(dataResponse)
+            }else{
+                let dataResponse = {
+                    status: false,
+                    message: result.message,
+                    responseData: {}
+                }
+                res.status(200).send(dataResponse)
+            }
+        }catch(err){
+            console.log("getMenuVsRole ::",err)
+        }
+    },
+    
 
     roleWiseAllMenu: async function (req,res,next,params) {
         try {
