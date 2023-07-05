@@ -12,5 +12,7 @@ const router= require("express").Router();
   router.post(["/passwordUpdate","/generalApi/passwordUpdate"],verifyToken,controller.updatePassword);
   router.get(["/getProfileDetails","/generalApi/getProfileDetails"],verifyToken,controller.getProfileDetails);
   router.post(["/forgetPassword","/generalApi/forgetPassword"],controller.forgetPaswrd);
+
+  router.get(["/getRoleMenu","/generalApi/getRoleMenu"],verifyToken,controller.getMenu);
   
   module.exports=router;

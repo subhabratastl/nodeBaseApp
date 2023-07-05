@@ -26,6 +26,7 @@ verifyToken = (req, res, next) => {
     }
     console.log('decodedddd 1st verify..',decoded);
     req.userCode= decoded.data.user_code;
+    req.roleCodeData= decoded.data.role_code;
     console.log('decode data....reqqqqq',req.userCode);
     next();
   });

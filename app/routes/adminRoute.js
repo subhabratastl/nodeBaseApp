@@ -29,8 +29,11 @@ const router= require("express").Router();
   router.get(["/getGroupUsersCount","/adminApi/getGroupUsersCount"],verifyToken,controller.getGroupWiseUsersCount);
   router.post(["/resource","/adminApi/resource"],verifyToken,controller.initialResource);
   router.get(["/resource","/adminApi/resource"],verifyToken,controller.initialResource);
+
+  router.get(["/subha","/adminApi/subha"],controller.roleWiseAllMenu);
+
+  router.post(["/menuVsRole","/adminApi/menuVsRole"],verifyToken,controller.initalMenuVsRole);
   
-
-
+  
   module.exports=router;
 //};

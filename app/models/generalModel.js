@@ -127,5 +127,19 @@ var generalModel=module.exports ={
         }
       },
 
-     
+      roleWiseAllMenuModel:async function(params){
+        try{
+          let query= "SELECT mm.id,mm.parent_id as parent,mm.icon_class AS menuIcon,mvr.alias_menu_name AS menuName,";
+          query += "ifnull(rm.resource_link,0) AS menuPath  from menu_master mm left join resource_master rm ON (rm.resource_code=mm.resource_code) ";
+          query += "left join menu_vs_role mvr ON (mvr.menu_code=mm.id) WHERE mvr.role_code=? ";
+          query += " order by mm.id;";
+          const [results] = await sequelize.query(query, {
+            replacements:[params.roleCode]
+          });
+          return { success: true,message:'Data Fetching Successfully',data:results };
+        }catch(err){
+          console.log("Get All Menu ::",err);
+          return { success: false,message:'Data not fetching due to server issue' };
+        }
+      }
 }

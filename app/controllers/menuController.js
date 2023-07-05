@@ -66,6 +66,30 @@ var menuController= module.exports ={
         }catch(err){
             console.log('error get All Menu..',err);
         }
+    },
+
+    updateMenu:async function(req,res,next,params){
+        try{
+            let result=await menuModel.menuUpdateModel(params);
+            if(result.success){
+                let dataResponse={
+                    status:"000",
+                    message:result.message,
+                    responseData:result.data
+                  }
+                res.status(200).send(dataResponse)
+            }else{
+                let dataResponse = {
+                    status: false,
+                    message: result.message,
+                    responseData: {}
+                }
+                res.status(200).send(dataResponse)
+            }
+
+        }catch(err){
+            console.log('error update Menu..',err); 
+        }
     }
 
 }

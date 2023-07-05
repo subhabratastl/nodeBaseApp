@@ -42,6 +42,18 @@ var adminController= module.exports ={
             adminController.getResouceData(req,res,next,params);
         }
     },
+
+    initalMenuVsRole:async function(req,res,next){
+        var params=req.body;
+        params.myUserCode=req.userCode;
+        if(params.op_type=="ADD_MENU_MAPPING"){
+            adminController.addMenuVsRole(req,res,next,params);
+        }else if(params.op_type=="UPDATE_MENU_MAPPING"){
+            adminController.updateMenuVsRole(req,res,next,params);
+        }else{
+            adminController.getMenuVsRole(req,res,next,params);
+        }
+    },
     createUser: async function(req,res,next,params){
         try{
             let max=999999;
@@ -480,6 +492,78 @@ var adminController= module.exports ={
             console.log('create Role..',err);
         }
     },
+    addMenuVsRole:async function(req,res,next,params){
+        try{
+            let result=await adminModel.addMenuVsRoleModel(params);
+            if(result.success){
+                let dataResponse={
+                    status:"000",
+                    message:result.message,
+                    responseData:{}
+                  }
+                res.status(200).send(dataResponse)
+            }else{
+                let dataResponse = {
+                    status: false,
+                    message: result.message,
+                    responseData: {}
+                }
+                res.status(200).send(dataResponse)
+            }
+        }catch(err){
+            console.log("Add menuVsRole..",err);
+        }
+    },
 
+    getMenuVsRole:async function (req,res,next,params){
+        try{
+            let result=await adminModel.getMenuVsRoleModel(params);
+            if(result.success){
+                let dataResponse={
+                    status:"000",
+                    message:result.message,
+                    responseData:result.data
+                  }
+                res.status(200).send(dataResponse)
+            }else{
+                let dataResponse = {
+                    status: false,
+                    message: result.message,
+                    responseData: {}
+                }
+                res.status(200).send(dataResponse)
+            }
+        }catch(err){
+            console.log("getMenuVsRole ::",err)
+        }
+    },
+
+    roleWiseAllMenu: async function (req,res,next,params) {
+        try {
+            console.log('reqqqqqqqqquesttttt', req.roleCode);
+            var params;
+            params.roleCode = req.roleCode;
+            let result = await roleWiseAllMenuModel(params)
+            if (result.success) {
+                let dataResponse = {
+                    status: false,
+                    message: result.message,
+                    responseData: result.data
+                }
+                res.status(200).send(dataResponse)
+            } else {
+                let dataResponse = {
+                    status: false,
+                    message: result.message,
+                    responseData: {}
+                }
+                res.status(200).send(dataResponse)
+            }
+            console.log('dataaaaaaaa$$$$$')
+
+        } catch (err) {
+            console.log('roleWiseAllMenu ::', err);
+        }
+    }
 
 }

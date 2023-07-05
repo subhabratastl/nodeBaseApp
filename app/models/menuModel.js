@@ -24,7 +24,7 @@ var menuModel=module.exports ={
             
             //console.log('menu modellll', params);
             let ofset;
-            let query = "select a.*,ifnull(b.menu_name,'#') as parent_name from menu_master a left join (select menu_name,id from menu_master  WHERE parent_id='#') b on b.id=a.parent_id and a.parent_id!='#' ORDER BY a.menu_order";
+            let query = "select a.*,ifnull(b.menu_name,0) as parent_name from menu_master a left join (select menu_name,id from menu_master  WHERE parent_id='#') b on b.id=a.parent_id and a.parent_id!='#' ORDER BY a.menu_order";
             if(('start' in params) && ('length' in params)){
                 ofset = ((params.start - 1) * params.length);
                 query += ' LIMIT ? OFFSET ?';
@@ -38,6 +38,17 @@ var menuModel=module.exports ={
             console.error('Error executing query:', err);
             return { success: false,message:'Data not get properly' };
         }
+    },
+    menuUpdateModel:async function(params){
+        try {
+            let query = "UPDATE menu_master SET menu_name=?, resource_code=?,parent_id=?,menu_order=?, has_child=?,icon_class=?,access_type=?,updated_by=? WHERE id = ?";
+            const [results] = await sequelize.query(query, {
+              replacements: [params.menuName,params.resourceCode,params.parentId,params.menuOrder, params.hasChild,params.iconClass,params.accessType,params.myUserCode,params.menuId]
+            });
+            return { success: true, message: "Data Update Successfully" };
+          } catch (err) {
+            console.error('Error executing query:', error);
+            return { success: false, message: 'Data do not updated due to server issue' };
+          }
     }
-
 }

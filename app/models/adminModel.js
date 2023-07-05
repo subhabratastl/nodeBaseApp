@@ -119,8 +119,8 @@ var adminModel = module.exports = {
           password: {
             [Op.eq]: sequelize.literal('?'),
           },
-          record_status:{
-            [Op.eq]:1
+          record_status: {
+            [Op.eq]: 1
           }
         },
         replacements: [params.userName, params.password],
@@ -206,16 +206,13 @@ var adminModel = module.exports = {
   },
 
   UserUpdateDetails: async function (params) {
-
-    /* user_code,display_name,email_id,mobile_no,address,profile_photo,created_by*/
-    if (params.profilePhoto == "") {
-      params.profilePhoto = null
-    }
-    const query = 'UPDATE user_details ud JOIN user_masters um ON ud.user_code = um.user_code SET ud.display_name=?,ud.email_id=?,ud.mobile_no=?,ud.profile_photo=?,ud.address=?,ud.updated_by=?,um.fk_role_code=? Where ud.user_code=? AND um.user_code=?';
-
     try {
+      if (params.profilePhoto == "") {
+        params.profilePhoto = null
+      }
+      const query = 'UPDATE user_details ud JOIN user_masters um ON ud.user_code = um.user_code SET ud.display_name=?,ud.email_id=?,ud.mobile_no=?,ud.profile_photo=?,ud.address=?,ud.updated_by=?,um.fk_role_code=? Where ud.user_code=? AND um.user_code=?';
       const [results] = await sequelize.query(query, {
-        replacements: [params.displayName,params.emailId, params.mobileNo, params.profilePhoto, params.address, params.updatedBy,params.roleCode, params.userCode,params.userCode] // Provide values for the placeholders
+        replacements: [params.displayName, params.emailId, params.mobileNo, params.profilePhoto, params.address, params.updatedBy, params.roleCode, params.userCode, params.userCode] // Provide values for the placeholders
       });
       console.log(results); // Display the query results
       return results;
@@ -237,9 +234,8 @@ var adminModel = module.exports = {
   createRoleDetails: async function (params) {
 
     /* user_code,display_name,email_id,mobile_no,address,profile_photo,created_by*/
-    const query = 'INSERT INTO role_masters (role_code, role_name,created_by) VALUES (?, ?, ?)';
-
     try {
+      const query = 'INSERT INTO role_masters (role_code, role_name,created_by) VALUES (?, ?, ?)';
       const [results] = await sequelize.query(query, {
         replacements: [params.role_code, params.role_name, params.createdBy] // Provide values for the placeholders
       });
@@ -251,11 +247,9 @@ var adminModel = module.exports = {
   },
 
   updateRoleDetails: async function (params) {
-
     /* user_code,display_name,email_id,mobile_no,address,profile_photo,created_by*/
-    const query = 'UPDATE role_masters SET role_name=?, updated_by=? Where role_code=?';
-
     try {
+      const query = 'UPDATE role_masters SET role_name=?, updated_by=? Where role_code=?';
       const [results] = await sequelize.query(query, {
         replacements: [params.role_name, params.updatedBy, params.role_code] // Provide values for the placeholders
       });
@@ -269,9 +263,10 @@ var adminModel = module.exports = {
   getTotalCount: async function (params) {
 
     /* user_code,display_name,email_id,mobile_no,address,profile_photo,created_by*/
-    const query = 'SELECT COUNT(*) AS totalRecords FROM user_masters WHERE record_status NOT IN (2)';
+    
 
     try {
+      const query = 'SELECT COUNT(*) AS totalRecords FROM user_masters WHERE record_status NOT IN (2)';
       const [results] = await sequelize.query(query, {
         // Provide values for the placeholders
       });
@@ -281,87 +276,143 @@ var adminModel = module.exports = {
       return { success: false, data: "User list not getting properly" };
     }
   },
-  updateUserStatus:async function(params){
+  updateUserStatus: async function (params) {
     try {
       const query = 'UPDATE user_details JOIN user_masters ON user_details.user_code = user_masters.user_code SET user_details.record_status = ?, user_masters.record_status = ?,user_details.updated_by=?,user_masters.updated_by=? WHERE user_details.user_code = ?';
-      const [resultData] = await sequelize.query(query,{
-        replacements:[params.statusCode,params.statusCode,params.updatedBy,params.updatedBy,params.userCode]
+      const [resultData] = await sequelize.query(query, {
+        replacements: [params.statusCode, params.statusCode, params.updatedBy, params.updatedBy, params.userCode]
       })
       return resultData;
     } catch (err) {
       console.log(err);
     }
   },
-    updateRoleStatus:async function(params){
-      try {
-        const query = 'UPDATE role_masters SET record_status = ?,updated_by=? WHERE role_code = ?';
-        const [resultData] = await sequelize.query(query,{
-          replacements:[params.statusCode,params.updatedBy,params.roleCode]
-        })
-        return resultData;
-      } catch (err) {
-        console.log(err);
-      }
+  updateRoleStatus: async function (params) {
+    try {
+      const query = 'UPDATE role_masters SET record_status = ?,updated_by=? WHERE role_code = ?';
+      const [resultData] = await sequelize.query(query, {
+        replacements: [params.statusCode, params.updatedBy, params.roleCode]
+      })
+      return resultData;
+    } catch (err) {
+      console.log(err);
+    }
   },
-  getUserCountModel:async function(){
-    try{
-      const query='SELECT COUNT(*) AS totalUsers,CAST(SUM(CASE WHEN record_status = 1 THEN 1 ELSE 0 END)AS SIGNED) AS activeUsers,CAST(SUM(CASE WHEN record_status = 0 THEN 1 ELSE 0 END)AS SIGNED) AS inActiveUsers FROM user_masters WHERE record_status NOT IN (2)';
-      
-      const [resultData] = await sequelize.query(query,{})
+  getUserCountModel: async function () {
+    try {
+      const query = 'SELECT COUNT(*) AS totalUsers,CAST(SUM(CASE WHEN record_status = 1 THEN 1 ELSE 0 END)AS SIGNED) AS activeUsers,CAST(SUM(CASE WHEN record_status = 0 THEN 1 ELSE 0 END)AS SIGNED) AS inActiveUsers FROM user_masters WHERE record_status NOT IN (2)';
+      const [resultData] = await sequelize.query(query, {})
       //return { success: true, data: result };
       return resultData;
-    }catch(err){
-      console.log('get user count model...',err)
+    } catch (err) {
+      console.log('get user count model...', err)
       //return { success: false, error: 'Sequelize query failed' };
-      
+
     }
   },
 
-  getGroupWiseUsersCountModel:async function(){
-    try{
-      const query='SELECT rm.role_name AS roleName,COUNT(*) AS totalCount FROM role_masters rm JOIN user_masters um ON rm.role_code = um.fk_role_code where rm.record_status NOT IN (2) GROUP BY rm.role_code ORDER BY rm.id';
-      
-      const [resultData] = await sequelize.query(query,{})
+  getGroupWiseUsersCountModel: async function () {
+    try {
+      const query = 'SELECT rm.role_name AS roleName,COUNT(*) AS totalCount FROM role_masters rm JOIN user_masters um ON rm.role_code = um.fk_role_code where rm.record_status NOT IN (2) GROUP BY rm.role_code ORDER BY rm.id';
+      const [resultData] = await sequelize.query(query, {})
       return resultData;
-    }catch(err){
-      console.log('getGroupWiseUsersCountModel',err);
+    } catch (err) {
+      console.log('getGroupWiseUsersCountModel', err);
     }
   },
 
   createResourceModel: async function (params) {
 
     /* user_code,display_name,email_id,mobile_no,address,profile_photo,created_by*/
-    const query = 'INSERT INTO resource_master (resource_code, resource_name,resource_link,is_maintenance,record_status,created_by) VALUES (?, ?, ?, ?, ?, ?)';
     try {
+      const query = 'INSERT INTO resource_master (resource_code, resource_name,resource_link,is_maintenance,record_status,created_by) VALUES (?, ?, ?, ?, ?, ?)';
       const [results] = await sequelize.query(query, {
-        replacements: [params.resourceCode,params.resourceName,params.resourceLink,params.isMaintenance,params.recordStatus,params.myUserCode] // Provide values for the placeholders
+        replacements: [params.resourceCode, params.resourceName, params.resourceLink, params.isMaintenance, params.recordStatus, params.myUserCode] // Provide values for the placeholders
       });
-      return { success: true,message:"Create Resource successfully", data: results };
+      return { success: true, message: "Create Resource successfully", data: results };
     } catch (error) {
       console.error('Error executing query:', error);
-      return { success: false,message:'Data not inserted properly' };
+      return { success: false, message: 'Data not inserted properly' };
     }
   },
-  getResourceModel:async function(params){
-    try{
-      const query="SELECT resource_code AS resourceCode, resource_name AS resourceName,resource_link AS resourceLink,is_maintenance isMaintenance,record_status AS recordStatus FROM resource_master WHERE record_status NOT IN (2) ORDER BY id DESC ";
+  getResourceModel: async function (params) {
+    try {
+      const query = "SELECT resource_code AS resourceCode, resource_name AS resourceName,resource_link AS resourceLink,is_maintenance isMaintenance,record_status AS recordStatus FROM resource_master WHERE record_status NOT IN (2) ORDER BY id DESC ";
       const [results] = await sequelize.query(query, {});
-      return { success: true,message:"Data Fetch Successfully", data: results };
-    }catch(err){
+      return { success: true, message: "Data Fetch Successfully", data: results };
+    } catch (err) {
       console.error('Error executing query:', error);
-      return { success: false,message:'Data not fetching due to server issue' };
+      return { success: false, message: 'Data not fetching due to server issue' };
     }
   },
-  updateResouceModel:async function(params){
-    try{
-      const query="UPDATE resource_master SET resource_name=?,resource_link=?,is_maintenance=?,record_status=?,updated_by=? WHERE resource_code = ?";
+  updateResouceModel: async function (params) {
+    try {
+      const query = "UPDATE resource_master SET resource_name=?,resource_link=?,is_maintenance=?,record_status=?,updated_by=? WHERE resource_code = ?";
       const [results] = await sequelize.query(query, {
-        replacements:[params.resourceName,params.resourceLink,params.isMaintenance,params.recordStatus,params.myUserCode,params.resourceCode]
+        replacements: [params.resourceName, params.resourceLink, params.isMaintenance, params.recordStatus, params.myUserCode, params.resourceCode]
       });
-      return { success: true,message:"Data Update Successfully"};
-    }catch(err){
+      return { success: true, message: "Data Update Successfully" };
+    } catch (err) {
       console.error('Error executing query:', error);
-      return { success: false,message:'Data do not updated due to server issue' };
+      return { success: false, message: 'Data do not updated due to server issue' };
+    }
+  },
+
+  addMenuVsRoleModel: async function (params) {
+    try {
+      let query = 'INSERT INTO menu_vs_role (role_code,menu_code,alias_menu_name,created_by) VALUES (?,?,?,?)';
+      const [results] = await sequelize.query(query, {
+        replacements: [params.roleCode, params.menuCode, params.aliasMenuName, params.myUserCode]
+      });
+      return { success: true, message: "Data Add Successfully" };
+    } catch (err) {
+      console.log('addMenuVsRoleModel ::', err)
+      return { success: false, message: 'Data not inserted properly' };
+    }
+  },
+  getMenuVsRoleModel: async function (params) {
+    try {
+      let query = 'SELECT mvr.role_code AS roleCode,rms.role_Name AS roleName,mvr.menu_code AS menuCode,mvr.alias_menu_name AS aliasMenuName,mvr.record_status AS recordStatus FROM menu_vs_role mvr INNER JOIN role_masters rms ON (rms.role_code=mvr.role_code) ';
+      queru += 'WHERE mvr.menu_code=? ';
+      query += 'AND mvr.record_status NOT IN (2) ORDER BY mvr.id ';
+      const [results] = await sequelize.query(query, {
+        replacements: [params.menuCode]
+      });
+      return { success: true, message: 'Data Fetching Successfully', data: results };
+    } catch (err) {
+      console.log("Get MenuVsRole ::", err);
+      return { success: false, message: 'Data not fetching due to server issue' };
+    }
+  },
+
+  getMenuVsRoleModel: async function (params) {
+    try {
+      let query = 'SELECT mvr.role_code AS roleCode,rms.role_Name AS roleName,mvr.menu_code AS menuCode,mvr.alias_menu_name AS aliasMenuName,mvr.record_status AS recordStatus FROM menu_vs_role mvr INNER JOIN role_masters rms ON (rms.role_code=mvr.role_code) ';
+      queru += 'WHERE mvr.menu_code=? ';
+      query += 'AND mvr.record_status NOT IN (2) ORDER BY mvr.id ';
+      const [results] = await sequelize.query(query, {
+        replacements: [params.menuCode]
+      });
+      return { success: true, message: 'Data Fetching Successfully', data: results };
+    } catch (err) {
+      console.log("Get MenuVsRole ::", err);
+      return { success: false, message: 'Data not fetching due to server issue' };
+    }
+  },
+
+  roleWiseAllMenuModel: async function (params) {
+    try {
+      let query = "SELECT mm.menu_name,mvr.alias_menu_name,mm.menu_order,mm.has_child,";
+      query += "ifnull(rm.resource_link,0) from menu_master mm left join resource_master rm ON (rm.resource_code=mm.resource_code) ";
+      query += "left join menu_vs_role mvr ON (mvr.menu_code=mm.id) WHERE mvr.role_code=? ";
+      query += " order by mm.id;";
+      const [results] = await sequelize.query(query, {
+        replacements: [params.roleCode]
+      });
+      return { success: true, message: 'Data Fetching Successfully', data: results };
+    } catch (err) {
+      console.log("Get All Menu ::", err);
+      return { success: false, message: 'Data not fetching due to server issue' };
     }
   }
 }
