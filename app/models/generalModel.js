@@ -64,9 +64,11 @@ var generalModel=module.exports ={
               replacements: [params.oldPassword,params.myUserCode] // Provide values for the placeholders
             });
             console.log(results); // Display the query results
-            return results;
+            return { success: true,message:'Old Password Do not match',data:results };
+            
           } catch (error) {
             console.error('Error executing query:', error);
+            return { success: false,message:'Password do not updated properly, due to server issue',data:results };
           }
       },
 
@@ -129,7 +131,7 @@ var generalModel=module.exports ={
 
       roleWiseAllMenuModel:async function(params){
         try{
-          let query= "SELECT mm.id,mm.parent_id as parent,mm.icon_class AS menuIcon,mvr.alias_menu_name AS menuName,";
+          let query= "SELECT mm.id,mm.parent_id as parent,mm.icon_class AS menuIcon,mvr.alias_menu_name AS menuName,mvr.access_type AS accessType, ";
           query += "ifnull(rm.resource_link,0) AS menuPath  from menu_master mm left join resource_master rm ON (rm.resource_code=mm.resource_code) ";
           query += "left join menu_vs_role mvr ON (mvr.menu_code=mm.id) WHERE mvr.role_code=?  AND mvr.record_status=1";
           query += " order by mm.id;";

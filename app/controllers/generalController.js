@@ -106,7 +106,8 @@ var generalController = module.exports = {
             // if(params.oldPassword==)
             console.log('password... entry');
             let passwordMatch = await generalModel.getPassword(params);
-            if (passwordMatch) {
+            console.log('passsword........',passwordMatch);
+            if (passwordMatch.data[0].password_match) {
                 let passwordUpdate = await generalModel.passwordUpdate(params);
                 let dataResponse = {
                     status: "000",
@@ -117,7 +118,8 @@ var generalController = module.exports = {
             } else {
                 let dataResponse = {
                     status: false,
-                    message: "Old password not match with our database"
+                    message: "Old password not match with our database",
+                    responseData: {}
                 }
                 res.status(200).send(dataResponse)
             }
@@ -140,12 +142,22 @@ var generalController = module.exports = {
                 let otpGet = await generalModel.otpSend(params);
                 let sendEmail = await generalController.getDataForSendOTPtoEmail(params);
                 console.log('sendEmail............', sendEmail);
-                let dataResponse = {
-                    status: "000",
-                    message: "OTP Send to your register Email Id",
-                    responseData: Object.assign({}, ...sendEmail)
+                if(sendEmail.success){
+                    let dataResponse = {
+                        status: "000",
+                        message: "OTP Send to your register Email Id",
+                        responseData: Object.assign({}, ...sendEmail.data)
+                    }
+                    res.status(200).send(dataResponse)
+                }else{
+                    let dataResponse = {
+                        status: false,
+                        message: "OTP not Send to your register Email Id",
+                        responseData: {}
+                    }
+                    res.status(200).send(dataResponse)
                 }
-                res.status(200).send(dataResponse)
+                
             } else if (params.op_type == 'VERIFY_OTP') {
                 console.log('Verify otp');
                 console.log('paramsssss....verify', params);
@@ -192,16 +204,26 @@ var generalController = module.exports = {
                 text: `Test OTP .${params.otp}`
             };
 
-            transporter.sendMail(mailOptions, function (error, info) {
-                if (error) {
-                    console.log('Error:', error);
-                    return { success: false, data: 'OTP not send' }
-                } else {
-                    console.log('Email sent:', info.response);
-                    return result;
-                }
-            });
-            console.log('email get from DB..', result);
+            try {
+                const info = await transporter.sendMail(mailOptions);
+                console.log('Email sent:', info.response);
+                return { success: true, message: 'OTP send successfully',data:result };
+            } catch (error) {
+                console.log('Error:', error);
+                return { success: false, message: 'OTP not send' };
+            }
+
+            // transporter.sendMail(mailOptions, function (error, info) {
+            //     if (error) {
+            //         console.log('Error:', error);
+            //         return { success: false, data: 'OTP not send' }
+            //     } else {
+            //         console.log('Email sent:', info.response);
+            //         return { success: true, data: 'OTP send successfully' };
+            //     }
+            // });
+            
+            //console.log('email get from DB..', result);
         } catch (err) {
             console.log('get data for email', err)
         }

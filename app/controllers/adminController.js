@@ -10,6 +10,7 @@ var adminController= module.exports ={
         var params=req.body;
         params.createdBy=req.userCode;
         params.updatedBy=req.userCode;
+        params.myRoleCode=req.roleCodeData;
         //console.log("roleeeeeeeeeeeeeeeeeeee",req.body);
         if (params.op_type=="ROLE_CREATE"){
             adminController.createRole(req,res,next);
@@ -22,6 +23,7 @@ var adminController= module.exports ={
         var params=req.body;
         params.createdBy=req.userCode;
         params.updatedBy=req.userCode;
+        params.myRoleCode=req.roleCodeData;
         if(params.op_type=="USER_CREATE"){
             adminController.createUser(req,res,next,params);
         }else if(params.op_type=="USER_UPDATE"){
@@ -246,7 +248,7 @@ var adminController= module.exports ={
             //let params=req.body;
             let result=await adminModel.getAllUserList(params);
             if(result.success){
-                let totalRecords=await adminModel.getTotalCount();
+                let totalRecords=await adminModel.getTotalCount(params);
                 if(totalRecords.success){
                     let dataResponse={
                         status:"000",
@@ -298,7 +300,7 @@ var adminController= module.exports ={
     getAllRoles:async function(req,res,next){
         try{
             let params=req.body;
-            
+            params.myRoleCode=req.roleCodeData;
             let result=await adminModel.getAllRoles(params);
             let dataResponse={
                 status:"000",
@@ -315,22 +317,42 @@ var adminController= module.exports ={
         }
     },
 
-    createRole: async function(req,res,next){
-        try{
-            let params=req.body;
-            params.createdBy=req.userCode;
-            
-            let result= await adminModel.createRoleDetails(params);
-            let dataResponse={
-                status:"000",
-                message:"Created New Role Successfully",
-                responseData:{
-                    data:result
+    createRole: async function (req, res, next) {
+        try {
+            let params = req.body;
+            params.createdBy = req.userCode;
+            let result
+            if (params.myRoleCode !== 'SADMIN' && params.role_code == 'SADMIN') {
+                let dataResponse = {
+                    status: false,
+                    message: 'Data not inserted Properly',
+                    responseData: {}
                 }
-              }
-            res.status(200).send(dataResponse)
-        }catch(err){
-            console.log('create Role..',err);
+                res.status(200).send(dataResponse)
+            } else {
+                result = await adminModel.createRoleDetails(params);
+
+
+                if (result.success) {
+                    let dataResponse = {
+                        status: "000",
+                        message: result.message,
+                        responseData: {
+                            data: result.data
+                        }
+                    }
+                    res.status(200).send(dataResponse)
+                } else {
+                    let dataResponse = {
+                        status: false,
+                        message: result.message,
+                        responseData: {}
+                    }
+                    res.status(200).send(dataResponse)
+                }
+            }
+        } catch (err) {
+            console.log('create Role..', err);
         }
     },
 
@@ -338,14 +360,24 @@ var adminController= module.exports ={
         try{
             params.createdBy=req.userCode;
             let result= await adminModel.updateRoleDetails(params);
-            let dataResponse={
-                status:"000",
-                message:"Updated Role Successfully",
-                responseData:{
-                    data:result
-                }
-              }
-            res.status(200).send(dataResponse)
+            if(result.success){
+                let dataResponse={
+                    status:"000",
+                    message:result.message,
+                    responseData:{
+                        data:result.data
+                    }
+                  }
+                res.status(200).send(dataResponse)
+            }else{
+                let dataResponse={
+                    status:false,
+                    message:result.message,
+                    responseData:{}
+                  }
+                res.status(200).send(dataResponse)
+            }
+            
         }catch(err){
             console.log('create Role..',err);
         }

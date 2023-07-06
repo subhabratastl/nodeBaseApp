@@ -153,21 +153,27 @@ var adminModel = module.exports = {
       //   offset: sequelize.literal('?'),
       //   replacements: [params.start, params.length],
       // });
-
+      let replacementsData = [];
       let st = ((params.start - 1) * params.length);
       let query = 'SELECT u.user_code,u.display_name,u.email_id,u.mobile_no,u.address,u.profile_photo,um.user_name,um.fk_role_code AS role_code,um.record_status,rms.role_name AS role_name FROM user_details u INNER JOIN user_masters um ON (u.user_code=um.user_code) INNER JOIN role_masters rms on (rms.role_code=um.fk_role_code) ';
-      query += 'WHERE um.record_status NOT IN (2)';
+      query += ' WHERE um.record_status NOT IN (2)';
+      // if (params.myRoleCode != 'SADMIN') {
+      //   query += ' AND um.fk_role_code NOT IN(?)'
+      //   replacementsData.push('SADMIN');
+      // }
       query += 'ORDER BY u.id DESC LIMIT ? OFFSET ? ';
+      replacementsData.push(params.length);
+      replacementsData.push(st);
 
       console.log('queryyyy', query);
       const [resultData] = await sequelize.query(query, {
-        replacements: [params.length, st]
+        replacements: replacementsData
       })
 
       //console.log(result)
       return { success: true, data: resultData };
     } catch (err) {
-      console.log(err);
+      console.log('data @@@@@@@@@@@@@@@@@@@@@@@@@',err);
       return { success: false, data: "User list not getting properly" };
     }
   },
@@ -223,8 +229,18 @@ var adminModel = module.exports = {
 
   getAllRoles: async function (params) {
     try {
-      const query = 'SELECT role_code,role_name,record_status from role_masters where role_masters.record_status NOT IN (2)  order by id DESC';
-      const [resultData] = await sequelize.query(query)
+      let replacementsData = [];
+      let query = 'SELECT role_code,role_name,record_status from role_masters where role_masters.record_status NOT IN (2) ';
+      if (params.myRoleCode != 'SADMIN') {
+        query += ' AND role_code NOT IN(?)'
+        replacementsData.push('SADMIN');
+      }
+
+      query += 'order by id DESC';
+
+      const [resultData] = await sequelize.query(query, {
+        replacements:replacementsData
+      })
       return resultData;
     } catch (err) {
       console.log(err);
@@ -240,9 +256,10 @@ var adminModel = module.exports = {
         replacements: [params.role_code, params.role_name, params.createdBy] // Provide values for the placeholders
       });
       console.log(results); // Display the query results
-      return results;
+      return { success: true, data: results,message:'Created New Role Successfully' };
     } catch (error) {
       console.error('Error executing query:', error);
+      return { success: false,message:'Data not inserted properly' };
     }
   },
 
@@ -254,21 +271,28 @@ var adminModel = module.exports = {
         replacements: [params.role_name, params.updatedBy, params.role_code] // Provide values for the placeholders
       });
       console.log(results); // Display the query results
-      return results;
+      return { success: true, data: results,message:'Updated Role not Successfully' };
     } catch (error) {
       console.error('Error executing query:', error);
+      return { success: false,message:'Updated Role not Successfully' };
     }
   },
 
   getTotalCount: async function (params) {
 
     /* user_code,display_name,email_id,mobile_no,address,profile_photo,created_by*/
-    
+
 
     try {
-      const query = 'SELECT COUNT(*) AS totalRecords FROM user_masters WHERE record_status NOT IN (2)';
+      let replacementsData = [];
+      let query = 'SELECT COUNT(*) AS totalRecords FROM user_masters WHERE record_status NOT IN (2)';
+      if (params.myRoleCode != 'SADMIN') {
+        query += ' AND fk_role_code NOT IN(?)'
+        replacementsData.push('SADMIN');
+      }
       const [results] = await sequelize.query(query, {
         // Provide values for the placeholders
+        replacements: replacementsData
       });
       return { success: true, data: results };
     } catch (error) {
@@ -360,9 +384,9 @@ var adminModel = module.exports = {
 
   addMenuVsRoleModel: async function (params) {
     try {
-      let query = 'INSERT INTO menu_vs_role (role_code,menu_code,alias_menu_name,created_by,record_status) VALUES (?,?,?,?,?)';
+      let query = 'INSERT INTO menu_vs_role (role_code,menu_code,alias_menu_name,created_by,record_status,access_type) VALUES (?,?,?,?,?,?)';
       const [results] = await sequelize.query(query, {
-        replacements: [params.roleCode, params.menuCode, params.aliasMenuName, params.myUserCode,params.recordStatus]
+        replacements: [params.roleCode, params.menuCode, params.aliasMenuName, params.myUserCode, params.recordStatus, params.accessType]
       });
       return { success: true, message: "Data Add Successfully" };
     } catch (err) {
@@ -387,7 +411,7 @@ var adminModel = module.exports = {
 
   getRoleVsMenuModel: async function (params) {
     try {
-      let query = 'SELECT mvr.id,mvr.role_code AS roleCode,mvr.menu_code AS menuCode,mm.menu_name AS menuName,mvr.alias_menu_name AS aliasMenuName,mvr.record_status AS recordStatus FROM menu_vs_role mvr ';
+      let query = 'SELECT mvr.id,mvr.role_code AS roleCode,mvr.menu_code AS menuCode,mm.menu_name AS menuName,mvr.alias_menu_name AS aliasMenuName,mvr.record_status AS recordStatus,mvr.access_type AS accessType FROM menu_vs_role mvr ';
       query += ' Left join menu_master mm ON (mm.id=mvr.menu_code)';
       query += 'WHERE mvr.role_code=? ';
       query += 'AND mvr.record_status NOT IN (2) ORDER BY mvr.id ';
@@ -404,19 +428,18 @@ var adminModel = module.exports = {
   updateMenuVsRoleModel: async function (params) {
     try {
       let status;
-      if(params.recordStatus)
-      {
-        status=1;
-      }else{
-        status=0;
+      if (params.recordStatus) {
+        status = 1;
+      } else {
+        status = 0;
       }
-      const query = "UPDATE menu_vs_role SET role_code=?,menu_code=?,alias_menu_name=?,record_status=?,updated_by=? WHERE id = ?";
+      const query = "UPDATE menu_vs_role SET role_code=?,menu_code=?,alias_menu_name=?,record_status=?,updated_by=?,access_type=? WHERE id = ?";
       const [results] = await sequelize.query(query, {
-        replacements: [params.roleCode, params.menuCode, params.aliasMenuName, status, params.myUserCode, params.menuId]
+        replacements: [params.roleCode, params.menuCode, params.aliasMenuName, status, params.myUserCode, params.accessType, params.menuId]
       });
       return { success: true, message: "Data Update Successfully" };
     } catch (err) {
-      console.error('Error executing query:', error);
+      console.error('Error executing query:', err);
       return { success: false, message: 'Data do not updated due to server issue' };
     }
   },
