@@ -30,7 +30,7 @@ const router= require("express").Router();
   router.post(["/resourceSetup","/adminApi/resourceSetup"],verifyToken,controller.initialResource);
   router.get(["/getResource","/adminApi/getResource"],verifyToken,controller.getResourceForDropdown);
 
- router.post(["/roleToMenuMapping","/adminApi/roleToMenuMapping"],verifyToken,controller.initalMenuVsRole);
+ router.post(["/roleToMenuMapping","/adminApi/roleToMenuMapping"],verifyToken,controller.initalRoleVsMenu);
   
   
   module.exports=router;

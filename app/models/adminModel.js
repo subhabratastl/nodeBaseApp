@@ -173,7 +173,7 @@ var adminModel = module.exports = {
       //console.log(result)
       return { success: true, data: resultData };
     } catch (err) {
-      console.log('data @@@@@@@@@@@@@@@@@@@@@@@@@',err);
+      console.log('data @@@@@@@@@@@@@@@@@@@@@@@@@', err);
       return { success: false, data: "User list not getting properly" };
     }
   },
@@ -232,7 +232,7 @@ var adminModel = module.exports = {
       let replacementsData = [];
       let ofset = ((params.start - 1) * params.length);
       let query = 'SELECT role_code,role_name,record_status,';
-      query +='(SELECT COUNT(*) FROM role_masters ';
+      query += '(SELECT COUNT(*) FROM role_masters ';
       if (params.myRoleCode != 'SADMIN') {
         query += 'WHERE role_code NOT IN (?)';
         replacementsData.push('SADMIN');
@@ -247,12 +247,12 @@ var adminModel = module.exports = {
       replacementsData.push(ofset);
 
       const [resultData] = await sequelize.query(query, {
-        replacements:replacementsData
+        replacements: replacementsData
       })
-      return { success: true, data: resultData,message:'Get All Roles' };
+      return { success: true, data: resultData, message: 'Get All Roles' };
     } catch (err) {
       console.log(err);
-      return { success: false,message:'Data not Fetch properly' };
+      return { success: false, message: 'Data not Fetch properly' };
     }
   },
 
@@ -265,10 +265,10 @@ var adminModel = module.exports = {
         replacements: [params.role_code, params.role_name, params.createdBy] // Provide values for the placeholders
       });
       console.log(results); // Display the query results
-      return { success: true, data: results,message:'Created New Role Successfully' };
+      return { success: true, data: results, message: 'Created New Role Successfully' };
     } catch (error) {
       console.error('Error executing query:', error);
-      return { success: false,message:'Data not inserted properly' };
+      return { success: false, message: 'Data not inserted properly' };
     }
   },
 
@@ -280,16 +280,16 @@ var adminModel = module.exports = {
         replacements: [params.role_name, params.updatedBy, params.role_code] // Provide values for the placeholders
       });
       console.log(results); // Display the query results
-      return { success: true, data: results,message:'Updated Role not Successfully' };
+      return { success: true, data: results, message: 'Updated Role not Successfully' };
     } catch (error) {
       console.error('Error executing query:', error);
-      return { success: false,message:'Updated Role not Successfully' };
+      return { success: false, message: 'Updated Role not Successfully' };
     }
   },
 
-  getRolesForDropdownModel:async function(params){
+  getRolesForDropdownModel: async function (params) {
     try {
-      let replacementsData=[];
+      let replacementsData = [];
       let query = 'SELECT role_code,role_name,record_status FROM role_masters WHERE record_status NOT IN (?,?) ';
       replacementsData.push(0);
       replacementsData.push(2);
@@ -301,10 +301,10 @@ var adminModel = module.exports = {
         replacements: replacementsData
       });
       console.log(results); // Display the query results
-      return { success: true, data: results,message:'Data Fetch Successfully' };
+      return { success: true, data: results, message: 'Data Fetch Successfully' };
     } catch (error) {
       console.error('Error executing query:', error);
-      return { success: false,message:'Data not Fetch Successfully' };
+      return { success: false, message: 'Data not Fetch Successfully' };
     }
   },
 
@@ -392,9 +392,9 @@ var adminModel = module.exports = {
       let query = "SELECT resource_code AS resourceCode, resource_name AS resourceName,resource_link AS resourceLink,is_maintenance isMaintenance,record_status AS recordStatus,";
       query += " (SELECT COUNT(*) FROM resource_master WHERE record_status NOT IN (?)) AS totalCount ";
       query += " FROM resource_master WHERE record_status NOT IN (?) ORDER BY id DESC LIMIT ? OFFSET ? ";
-      replacementsData=[...replacementsData,2,2,params.length,ofset]
+      replacementsData = [...replacementsData, 2, 2, params.length, ofset]
       const [results] = await sequelize.query(query, {
-        replacements:replacementsData
+        replacements: replacementsData
       });
 
       return { success: true, message: "Data Fetch Successfully", data: results };
@@ -416,14 +416,14 @@ var adminModel = module.exports = {
     }
   },
 
-  getResourceForDropdownModel:async function(){
+  getResourceForDropdownModel: async function () {
     try {
       let replacementsData = [];
       let query = "SELECT resource_code AS resourceCode, resource_name AS resourceName,resource_link AS resourceLink,is_maintenance isMaintenance,record_status AS recordStatus ";
       query += " FROM resource_master WHERE record_status NOT IN (?,?) ORDER BY id DESC";
-      replacementsData=[...replacementsData,2,0]
+      replacementsData = [...replacementsData, 2, 0]
       const [results] = await sequelize.query(query, {
-        replacements:replacementsData
+        replacements: replacementsData
       });
 
       return { success: true, message: "Data Fetch Successfully", data: results };
@@ -462,12 +462,18 @@ var adminModel = module.exports = {
 
   getRoleVsMenuModel: async function (params) {
     try {
-      let query = 'SELECT mvr.id,mvr.role_code AS roleCode,mvr.menu_code AS menuCode,mm.menu_name AS menuName,mvr.alias_menu_name AS aliasMenuName,mvr.record_status AS recordStatus,mvr.access_type AS accessType FROM menu_vs_role mvr ';
+      let replacementsData = [];
+      let ofset = ((params.start - 1) * params.length);
+      let query = 'SELECT mvr.id,mvr.role_code AS roleCode,mvr.menu_code AS menuCode,mm.menu_name AS menuName,mvr.alias_menu_name AS aliasMenuName,mvr.record_status AS recordStatus,mvr.access_type AS accessType,';
+      query += ' (SELECT COUNT(*) FROM menu_vs_role lEFT JOIN menu_master ON (menu_master.id=menu_vs_role.menu_code) WHERE menu_master.record_status NOT IN (?) AND menu_vs_role.record_status NOT IN (?) AND menu_vs_role.role_code=?) AS total_count';
+      query += ' FROM menu_vs_role mvr';
       query += ' Left join menu_master mm ON (mm.id=mvr.menu_code)';
-      query += 'WHERE mvr.role_code=? ';
-      query += 'AND mvr.record_status NOT IN (2) ORDER BY mvr.id ';
+      query += ' WHERE mvr.role_code=?';
+      query += ' AND mvr.record_status NOT IN (2) ORDER BY mvr.id';
+      query += ' LIMIT ? OFFSET ?';
+      replacementsData = [...replacementsData, 2, 2, params.roleCode, params.roleCode, params.length, ofset]
       const [results] = await sequelize.query(query, {
-        replacements: [params.roleCode]
+        replacements: replacementsData
       });
       return { success: true, message: 'Data Fetching Successfully', data: results };
     } catch (err) {

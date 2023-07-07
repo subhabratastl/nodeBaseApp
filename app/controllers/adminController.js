@@ -47,15 +47,15 @@ var adminController = module.exports = {
         }
     },
 
-    initalMenuVsRole: async function (req, res, next) {
+    initalRoleVsMenu: async function (req, res, next) {
         var params = req.body;
         params.myUserCode = req.userCode;
         if (params.op_type == "ADD_MENU_MAPPING") {
-            adminController.addMenuVsRole(req, res, next, params);
+            adminController.addRoleVsMenu(req, res, next, params);
         } else if (params.op_type == "UPDATE_MENU_MAPPING") {
-            adminController.updateMenuVsRole(req, res, next, params);
+            adminController.updateRoleVsMenu(req, res, next, params);
         } else {
-            adminController.getMenuVsRole(req, res, next, params);
+            adminController.getRoleVsMenu(req, res, next, params);
         }
     },
     createUser: async function (req, res, next, params) {
@@ -589,7 +589,7 @@ var adminController = module.exports = {
             console.log('error get Resource data', err);
         }
     },
-    addMenuVsRole: async function (req, res, next, params) {
+    addRoleVsMenu: async function (req, res, next, params) {
         try {
             let result = await adminModel.addMenuVsRoleModel(params);
             if (result.success) {
@@ -612,14 +612,18 @@ var adminController = module.exports = {
         }
     },
 
-    getMenuVsRole: async function (req, res, next, params) {
+    getRoleVsMenu: async function (req, res, next, params) {
         try {
             let result = await adminModel.getRoleVsMenuModel(params);
+            console.log('result data....getRoleVsMenu',result);
             if (result.success) {
                 let dataResponse = {
                     status: "000",
                     message: result.message,
-                    responseData: result.data
+                    responseData: {
+                        data:((result.data).length!=0)?result.data:null,
+                        num_rows:((result.data).length !=0)?result.data[0].total_count:0
+                    }
                 }
                 res.status(200).send(dataResponse)
             } else {
@@ -635,7 +639,7 @@ var adminController = module.exports = {
         }
     },
 
-    updateMenuVsRole: async function (req, res, next, params) {
+    updateRoleVsMenu: async function (req, res, next, params) {
         try {
             console.log('updateMenuVsRole ::::', params)
             let result = await adminModel.updateMenuVsRoleModel(params);
