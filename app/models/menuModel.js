@@ -7,8 +7,8 @@ let sequelize = db.sequelize;
 var menuModel=module.exports ={
     menuCreateModel:async function(params){
         try {
-            console.log('menu modellll', params);
-            const query = 'INSERT INTO menu_master (menu_name, resource_code,parent_id,menu_order, has_child,icon_class,created_by) VALUES (?, ?, ?, ?, ?, ?, ?,)';
+            
+            const query = 'INSERT INTO menu_master (menu_name, resource_code,parent_id,menu_order, has_child,icon_class,created_by) VALUES (?, ?, ?, ?, ?, ?, ?)';
             const [results] = await sequelize.query(query, {
                 replacements: [params.menuName,params.resourceCode,params.parentId,params.menuOrder, params.hasChild,params.iconClass,params.myUserCode]
             });
@@ -41,14 +41,28 @@ var menuModel=module.exports ={
     },
     menuUpdateModel:async function(params){
         try {
-            let query = "UPDATE menu_master SET menu_name=?, resource_code=?,parent_id=?,menu_order=?, has_child=?,icon_class=?,updated_by=? WHERE id = ?";
+            let query = "UPDATE menu_master SET menu_name=?, resource_code=?,parent_id=?,menu_order=?, has_child=?,icon_class=?,updated_by=?,record_status=? WHERE id = ?";
             const [results] = await sequelize.query(query, {
-              replacements: [params.menuName,params.resourceCode,params.parentId,params.menuOrder, params.hasChild,params.iconClass,params.myUserCode,params.menuId]
+              replacements: [params.menuName,params.resourceCode,params.parentId,params.menuOrder, params.hasChild,params.iconClass,params.myUserCode,params.recordStatus,params.menuId]
             });
             return { success: true, message: "Data Update Successfully" };
           } catch (err) {
             console.error('Error executing query:', err);
             return { success: false, message: 'Data do not updated due to server issue' };
           }
+    },
+    getMenuDataForDropdownModel:async function(){
+        try{
+            let replacementsData=[];
+            let query = "SELECT id AS menuId,menu_name AS menuName FROM menu_master WHERE record_status NOT IN (?,?)";
+            replacementsData=[...replacementsData,2,0];
+            const [results] = await sequelize.query(query, {
+                replacements:replacementsData
+            });
+            return { success: true, message: "Data fetch Successfully",data:results };
+        }catch(err){
+            console.error('Error executing query:', err);
+            return { success: false, message: 'Data do not fetch successfully due to server issue' };
+        }
     }
 }

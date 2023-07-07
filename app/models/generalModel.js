@@ -133,7 +133,7 @@ var generalModel=module.exports ={
         try{
           let query= "SELECT mm.id,mm.parent_id as parent,mm.icon_class AS menuIcon,mvr.alias_menu_name AS menuName,mvr.access_type AS accessType, ";
           query += "ifnull(rm.resource_link,0) AS menuPath  from menu_master mm left join resource_master rm ON (rm.resource_code=mm.resource_code) ";
-          query += "left join menu_vs_role mvr ON (mvr.menu_code=mm.id) WHERE mvr.role_code=?  AND mvr.record_status=1";
+          query += "left join menu_vs_role mvr ON (mvr.menu_code=mm.id) WHERE mvr.role_code=?  AND mvr.record_status=1 AND mm.record_status=1";
           query += " order by mm.id;";
           const [results] = await sequelize.query(query, {
             replacements:[params.roleCode]

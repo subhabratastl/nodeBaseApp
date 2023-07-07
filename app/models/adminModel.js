@@ -227,23 +227,32 @@ var adminModel = module.exports = {
     }
   },
 
-  getAllRoles: async function (params) {
+  getAllRolesModel: async function (params) {
     try {
       let replacementsData = [];
-      let query = 'SELECT role_code,role_name,record_status from role_masters where role_masters.record_status NOT IN (2) ';
+      let ofset = ((params.start - 1) * params.length);
+      let query = 'SELECT role_code,role_name,record_status,';
+      query +='(SELECT COUNT(*) FROM role_masters ';
+      if (params.myRoleCode != 'SADMIN') {
+        query += 'WHERE role_code NOT IN (?)';
+        replacementsData.push('SADMIN');
+      }
+      query += ') AS total_count from role_masters where role_masters.record_status NOT IN (2) ';
       if (params.myRoleCode != 'SADMIN') {
         query += ' AND role_code NOT IN(?)'
         replacementsData.push('SADMIN');
       }
-
-      query += 'order by id DESC';
+      query += 'order by id DESC LIMIT ? OFFSET ?';
+      replacementsData.push(params.length);
+      replacementsData.push(ofset);
 
       const [resultData] = await sequelize.query(query, {
         replacements:replacementsData
       })
-      return resultData;
+      return { success: true, data: resultData,message:'Get All Roles' };
     } catch (err) {
       console.log(err);
+      return { success: false,message:'Data not Fetch properly' };
     }
   },
 
@@ -278,11 +287,28 @@ var adminModel = module.exports = {
     }
   },
 
+  getRolesForDropdownModel:async function(params){
+    try {
+      let replacementsData=[];
+      let query = 'SELECT role_code,role_name,record_status FROM role_masters WHERE record_status NOT IN (?,?) ';
+      replacementsData.push(0);
+      replacementsData.push(2);
+      if (params.myRoleCode != 'SADMIN') {
+        query += ' AND role_code NOT IN(?)';
+        replacementsData.push('SADMIN');
+      }
+      const [results] = await sequelize.query(query, {
+        replacements: replacementsData
+      });
+      console.log(results); // Display the query results
+      return { success: true, data: results,message:'Data Fetch Successfully' };
+    } catch (error) {
+      console.error('Error executing query:', error);
+      return { success: false,message:'Data not Fetch Successfully' };
+    }
+  },
+
   getTotalCount: async function (params) {
-
-    /* user_code,display_name,email_id,mobile_no,address,profile_photo,created_by*/
-
-
     try {
       let replacementsData = [];
       let query = 'SELECT COUNT(*) AS totalRecords FROM user_masters WHERE record_status NOT IN (2)';
@@ -359,10 +385,18 @@ var adminModel = module.exports = {
       return { success: false, message: 'Data not inserted properly' };
     }
   },
-  getResourceModel: async function (params) {
+  getAllResourceModel: async function (params) {
     try {
-      const query = "SELECT resource_code AS resourceCode, resource_name AS resourceName,resource_link AS resourceLink,is_maintenance isMaintenance,record_status AS recordStatus FROM resource_master WHERE record_status NOT IN (2) ORDER BY id DESC ";
-      const [results] = await sequelize.query(query, {});
+      let replacementsData = [];
+      let ofset = ((params.start - 1) * params.length);
+      let query = "SELECT resource_code AS resourceCode, resource_name AS resourceName,resource_link AS resourceLink,is_maintenance isMaintenance,record_status AS recordStatus,";
+      query += " (SELECT COUNT(*) FROM resource_master WHERE record_status NOT IN (?)) AS totalCount ";
+      query += " FROM resource_master WHERE record_status NOT IN (?) ORDER BY id DESC LIMIT ? OFFSET ? ";
+      replacementsData=[...replacementsData,2,2,params.length,ofset]
+      const [results] = await sequelize.query(query, {
+        replacements:replacementsData
+      });
+
       return { success: true, message: "Data Fetch Successfully", data: results };
     } catch (err) {
       console.error('Error executing query:', error);
@@ -379,6 +413,23 @@ var adminModel = module.exports = {
     } catch (err) {
       console.error('Error executing query:', error);
       return { success: false, message: 'Data do not updated due to server issue' };
+    }
+  },
+
+  getResourceForDropdownModel:async function(){
+    try {
+      let replacementsData = [];
+      let query = "SELECT resource_code AS resourceCode, resource_name AS resourceName,resource_link AS resourceLink,is_maintenance isMaintenance,record_status AS recordStatus ";
+      query += " FROM resource_master WHERE record_status NOT IN (?,?) ORDER BY id DESC";
+      replacementsData=[...replacementsData,2,0]
+      const [results] = await sequelize.query(query, {
+        replacements:replacementsData
+      });
+
+      return { success: true, message: "Data Fetch Successfully", data: results };
+    } catch (err) {
+      console.error('Error executing query:', error);
+      return { success: false, message: 'Data not fetching due to server issue' };
     }
   },
 

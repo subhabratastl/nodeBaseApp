@@ -1,71 +1,73 @@
-const adminModel= require("../models/adminModel.js")
+const adminModel = require("../models/adminModel.js")
 var jwt = require("jsonwebtoken");
 const config = require("../config/authConfig.js");
-const sessionSecret=require("../config/authConfig")
+const sessionSecret = require("../config/authConfig")
 var cryptoJs = require("crypto-js");
 
-var adminController= module.exports ={
-    
-    initialRole:async function(req,res,next){
-        var params=req.body;
-        params.createdBy=req.userCode;
-        params.updatedBy=req.userCode;
-        params.myRoleCode=req.roleCodeData;
+var adminController = module.exports = {
+
+    initialRole: async function (req, res, next) {
+        var params = req.body;
+        params.createdBy = req.userCode;
+        params.updatedBy = req.userCode;
+        params.myRoleCode = req.roleCodeData;
         //console.log("roleeeeeeeeeeeeeeeeeeee",req.body);
-        if (params.op_type=="ROLE_CREATE"){
-            adminController.createRole(req,res,next);
-        }else if(params.op_type=="ROLE_UPDATE"){
-            adminController.updateRole(req,res,next,params);
+        if (params.op_type == "ROLE_CREATE") {
+            adminController.createRole(req, res, next);
+        } else if (params.op_type == "ROLE_UPDATE") {
+            adminController.updateRole(req, res, next, params);
+        } else {
+            adminController.getAllRoles(req, res, next, params);
         }
     },
 
-    intialUser:async function(req,res,next){
-        var params=req.body;
-        params.createdBy=req.userCode;
-        params.updatedBy=req.userCode;
-        params.myRoleCode=req.roleCodeData;
-        if(params.op_type=="USER_CREATE"){
-            adminController.createUser(req,res,next,params);
-        }else if(params.op_type=="USER_UPDATE"){
-            adminController.updateUserDetails(req,res,next,params);
-        }else{
-            adminController.getUserList(req,res,next,params);
+    intialUser: async function (req, res, next) {
+        var params = req.body;
+        params.createdBy = req.userCode;
+        params.updatedBy = req.userCode;
+        params.myRoleCode = req.roleCodeData;
+        if (params.op_type == "USER_CREATE") {
+            adminController.createUser(req, res, next, params);
+        } else if (params.op_type == "USER_UPDATE") {
+            adminController.updateUserDetails(req, res, next, params);
+        } else {
+            adminController.getUserList(req, res, next, params);
         }
     },
 
-    initialResource:async function(req,res,next){
-        var params=req.body;
-        params.myUserCode=req.userCode;
-        if(params.op_type=="CREATE_RESOURCE"){
-            adminController.createResouce(req,res,next,params);
-        }else if(params.op_type=="UPDATE_RESOURCE"){
-            adminController.updateResouce(req,res,next,params);
-        }else{
-            adminController.getResouceData(req,res,next,params);
+    initialResource: async function (req, res, next) {
+        var params = req.body;
+        params.myUserCode = req.userCode;
+        if (params.op_type == "CREATE_RESOURCE") {
+            adminController.createResouce(req, res, next, params);
+        } else if (params.op_type == "UPDATE_RESOURCE") {
+            adminController.updateResouce(req, res, next, params);
+        } else {
+            adminController.getAllResouceData(req, res, next, params);
         }
     },
 
-    initalMenuVsRole:async function(req,res,next){
-        var params=req.body;
-        params.myUserCode=req.userCode;
-        if(params.op_type=="ADD_MENU_MAPPING"){
-            adminController.addMenuVsRole(req,res,next,params);
-        }else if(params.op_type=="UPDATE_MENU_MAPPING"){
-            adminController.updateMenuVsRole(req,res,next,params);
-        }else{
-            adminController.getMenuVsRole(req,res,next,params);
+    initalMenuVsRole: async function (req, res, next) {
+        var params = req.body;
+        params.myUserCode = req.userCode;
+        if (params.op_type == "ADD_MENU_MAPPING") {
+            adminController.addMenuVsRole(req, res, next, params);
+        } else if (params.op_type == "UPDATE_MENU_MAPPING") {
+            adminController.updateMenuVsRole(req, res, next, params);
+        } else {
+            adminController.getMenuVsRole(req, res, next, params);
         }
     },
-    createUser: async function(req,res,next,params){
-        try{
-            let max=999999;
-            let min=100000;
-            params.user_codes=Math.floor(Math.random() * (max - min + 1) + min);
-            console.log('user codeeee',params);
-            let result= await adminModel.createUserDetails(params);
-            if(result.success){
+    createUser: async function (req, res, next, params) {
+        try {
+            let max = 999999;
+            let min = 100000;
+            params.user_codes = Math.floor(Math.random() * (max - min + 1) + min);
+            console.log('user codeeee', params);
+            let result = await adminModel.createUserDetails(params);
+            if (result.success) {
                 let insertUserMaster = await adminModel.createUserDetailsMaster(params);
-                if(insertUserMaster.success){
+                if (insertUserMaster.success) {
                     let dataResponse = {
                         status: "000",
                         message: "Create User Successfully",
@@ -73,16 +75,16 @@ var adminController= module.exports ={
                             data: insertUserMaster
                         }
                     }
-                res.status(200).send(dataResponse)
-                }else{
+                    res.status(200).send(dataResponse)
+                } else {
                     let dataResponse = {
                         status: false,
                         message: result.data,
                         responseData: {}
                     }
                     res.status(200).send(dataResponse)
-                }  
-            }else{
+                }
+            } else {
                 let dataResponse = {
                     status: false,
                     message: result.data,
@@ -90,26 +92,26 @@ var adminController= module.exports ={
                 }
                 res.status(200).send(dataResponse)
             }
-            
-        }catch(err){
-            console.log('create user..',err);
+
+        } catch (err) {
+            console.log('create user..', err);
         }
     },
 
-    updateUserDetails:async function(req,res,next,params){
-        try{
-            console.log('user update...controllerss...',params)
-            let result= await adminModel.UserUpdateDetails(params); 
-            let dataResponse={
-                status:"000",
-                message:"Updated user details Successfully",
-                responseData:{
-                    data:result
+    updateUserDetails: async function (req, res, next, params) {
+        try {
+            console.log('user update...controllerss...', params)
+            let result = await adminModel.UserUpdateDetails(params);
+            let dataResponse = {
+                status: "000",
+                message: "Updated user details Successfully",
+                responseData: {
+                    data: result
                 }
-              }
+            }
             res.status(200).send(dataResponse)
-        }catch(err){
-            console.log('create Role..',err);
+        } catch (err) {
+            console.log('create Role..', err);
         }
     },
 
@@ -150,7 +152,7 @@ var adminController= module.exports ={
     //             // CAPTCHA verification successful
     //             // Continue with the login process
     //             //console.log('signin userssssssss', req.body);
-                
+
 
     //             let verifyUser = await adminModel.validatedUser(params)
     //             if (verifyUser) {
@@ -190,14 +192,14 @@ var adminController= module.exports ={
     //             // CAPTCHA verification failed
     //             // Handle the error or display an error message
     //         }
-            
+
     //     }catch(err){
     //         console.log('signin error',err);
     //     }
     // },
 
-    siginUser:async function(req,res,next){
-        try{
+    siginUser: async function (req, res, next) {
+        try {
             let params = req.body;
 
             const userCaptcha = params.captcha; // Assuming the user input is submitted in the 'captcha' field
@@ -224,7 +226,7 @@ var adminController= module.exports ={
                         message: "Authentication failed",
                         responseData: {}
                     }
-                    
+
                     res.status(200).send(dataResponse);
                 }
             } else {
@@ -237,82 +239,92 @@ var adminController= module.exports ={
                 // CAPTCHA verification failed
                 // Handle the error or display an error message
             }
-            
-        }catch(err){
-            console.log('signin error',err);
+
+        } catch (err) {
+            console.log('signin error', err);
         }
     },
 
-    getUserList:async function(req,res,next,params){
-        try{
+    getUserList: async function (req, res, next, params) {
+        try {
             //let params=req.body;
-            let result=await adminModel.getAllUserList(params);
-            if(result.success){
-                let totalRecords=await adminModel.getTotalCount(params);
-                if(totalRecords.success){
-                    let dataResponse={
-                        status:"000",
-                        message:"get ALL User List",
-                        responseData:{
-                            data:result.data,
-                            num_rows:totalRecords.data[0].totalRecords
+            let result = await adminModel.getAllUserList(params);
+            if (result.success) {
+                let totalRecords = await adminModel.getTotalCount(params);
+                if (totalRecords.success) {
+                    let dataResponse = {
+                        status: "000",
+                        message: "get ALL User List",
+                        responseData: {
+                            data: result.data,
+                            num_rows: totalRecords.data[0].totalRecords
                         }
                     }
-                    res.status(200).send(dataResponse); 
+                    res.status(200).send(dataResponse);
 
-                }else{
-                    let dataResponse={
-                        status:false,
-                        message:totalRecords.data,
-                        responseData:{}
+                } else {
+                    let dataResponse = {
+                        status: false,
+                        message: totalRecords.data,
+                        responseData: {}
                     }
                     res.status(200).send(dataResponse);
                 }
-                
-            }else{
-                let dataResponse={
-                    status:false,
-                    message:result.data,
-                    responseData:{}
+
+            } else {
+                let dataResponse = {
+                    status: false,
+                    message: result.data,
+                    responseData: {}
                 }
                 res.status(200).send(dataResponse);
             }
-        }catch(err){
-            console.log("get User List controller..",err)
+        } catch (err) {
+            console.log("get User List controller..", err)
         }
     },
 
-    signout:function(req,res,next){
-        try{
+    signout: function (req, res, next) {
+        try {
             console.log('signout...');
             delete req.headers['authorization'];
-            let dataResponse={
-                status:"000",
-                message:"Sign Out successfully",
-                responseData:{}
+            let dataResponse = {
+                status: "000",
+                message: "Sign Out successfully",
+                responseData: {}
             }
             res.status(200).send(dataResponse);
-         }catch(err){
+        } catch (err) {
             console.log(err);
         }
     },
 
-    getAllRoles:async function(req,res,next){
-        try{
-            let params=req.body;
-            params.myRoleCode=req.roleCodeData;
-            let result=await adminModel.getAllRoles(params);
-            let dataResponse={
-                status:"000",
-                message:"get ALL Roles Details",
-                responseData:{
-                    data:result,
-                    num_rows:result.length
+    getAllRoles: async function (req, res, next) {
+        try {
+            let params = req.body;
+            params.myRoleCode = req.roleCodeData;
+            let result = await adminModel.getAllRolesModel(params);
+            console.log('Alll Role...', result);
+            if (result.success) {
+                let dataResponse = {
+                    status: "000",
+                    message: result.message,
+                    responseData: {
+                        data: result.data,
+                        num_rows: result.data[0].total_count
+                    }
                 }
+                res.status(200).send(dataResponse);
+            } else {
+                let dataResponse = {
+                    status: false,
+                    message: result.message,
+                    responseData: {}
+                }
+                res.status(200).send(dataResponse);
             }
-            res.status(200).send(dataResponse);  
 
-        }catch(err){
+        } catch (err) {
             console.log(err);
         }
     },
@@ -331,8 +343,6 @@ var adminController= module.exports ={
                 res.status(200).send(dataResponse)
             } else {
                 result = await adminModel.createRoleDetails(params);
-
-
                 if (result.success) {
                     let dataResponse = {
                         status: "000",
@@ -356,36 +366,65 @@ var adminController= module.exports ={
         }
     },
 
-    updateRole: async function(req,res,next,params){
-        try{
-            params.createdBy=req.userCode;
-            let result= await adminModel.updateRoleDetails(params);
-            if(result.success){
-                let dataResponse={
-                    status:"000",
-                    message:result.message,
-                    responseData:{
-                        data:result.data
+    updateRole: async function (req, res, next, params) {
+        try {
+            params.createdBy = req.userCode;
+            let result = await adminModel.updateRoleDetails(params);
+            if (result.success) {
+                let dataResponse = {
+                    status: "000",
+                    message: result.message,
+                    responseData: {
+                        data: result.data
                     }
-                  }
+                }
                 res.status(200).send(dataResponse)
-            }else{
-                let dataResponse={
-                    status:false,
-                    message:result.message,
-                    responseData:{}
-                  }
+            } else {
+                let dataResponse = {
+                    status: false,
+                    message: result.message,
+                    responseData: {}
+                }
                 res.status(200).send(dataResponse)
             }
-            
-        }catch(err){
-            console.log('create Role..',err);
+
+        } catch (err) {
+            console.log('create Role..', err);
+        }
+    },
+
+    getRolesForDropdown: async function (req, res, next) {
+        try {
+            let params = req.body;
+            params.myRoleCode = req.roleCodeData;
+            let result = await adminModel.getRolesForDropdownModel(params);
+            console.log('Alll Role...', result);
+            if (result.success) {
+                let dataResponse = {
+                    status: "000",
+                    message: result.message,
+                    responseData: {
+                        data: result.data
+                    }
+                }
+                res.status(200).send(dataResponse);
+            } else {
+                let dataResponse = {
+                    status: false,
+                    message: result.message,
+                    responseData: {}
+                }
+                res.status(200).send(dataResponse);
+            }
+
+        } catch (err) {
+            console.log(err);
         }
     },
     activeDeactiveUser: async function (req, res, next) {
         try {
             console.log("active and deactive usersss..");
-            let params=req.body;
+            let params = req.body;
             params.updatedBy = req.userCode;
             await adminModel.updateUserStatus(params);
             let dataResponse = {
@@ -402,7 +441,7 @@ var adminController= module.exports ={
     activeDeactiveRole: async function (req, res, next) {
         try {
             console.log("active and deactive Role..");
-            let params=req.body;
+            let params = req.body;
             params.updatedBy = req.userCode;
             await adminModel.updateRoleStatus(params);
             let dataResponse = {
@@ -432,18 +471,18 @@ var adminController= module.exports ={
             console.log('get User count.', err);
         }
     },
-    getGroupWiseUsersCount:async function(req,res,next){
-        try{
+    getGroupWiseUsersCount: async function (req, res, next) {
+        try {
             console.log('Group Wise count');
-            let result= await adminModel.getGroupWiseUsersCountModel();
+            let result = await adminModel.getGroupWiseUsersCountModel();
             let dataResponse = {
                 status: "000",
                 message: "get Group Wise Users Count",
                 responseData: result
             }
             res.status(200).send(dataResponse)
-        }catch(err){
-            console.log('getGroupWiseUsersCount',err);
+        } catch (err) {
+            console.log('getGroupWiseUsersCount', err);
         }
     },
 
@@ -477,10 +516,59 @@ var adminController= module.exports ={
 
     },
 
-    getResouceData: async function (req, res, next, params) {
+    getAllResouceData: async function (req, res, next, params) {
         try {
-            console.log('get resource..', params);
-            let result = await adminModel.getResourceModel(params);
+            let result = await adminModel.getAllResourceModel(params);
+            if (result.success) {
+                let dataResponse = {
+                    status: "000",
+                    message: result.message,
+                    responseData: {
+                        data: result.data,
+                        totalRecordCount: result.data[0].totalCount
+                    }
+                }
+                res.status(200).send(dataResponse)
+            } else {
+                let dataResponse = {
+                    status: false,
+                    message: result.message,
+                    responseData: {}
+                }
+                res.status(200).send(dataResponse)
+            }
+
+        } catch (err) {
+            console.log('error get Resource data', err);
+        }
+    },
+    updateResouce: async function (req, res, next, params) {
+        try {
+            params.myUserCode = req.userCode;
+            let result = await adminModel.updateResouceModel(params);
+            if (result.success) {
+                let dataResponse = {
+                    status: "000",
+                    message: result.message,
+                    responseData: {}
+                }
+                res.status(200).send(dataResponse)
+            } else {
+                let dataResponse = {
+                    status: false,
+                    message: result.message,
+                    responseData: {}
+                }
+                res.status(200).send(dataResponse)
+            }
+        } catch (err) {
+            console.log('create Role..', err);
+        }
+    },
+
+    getResourceForDropdown:async function(req,res,next){
+        try {
+            let result = await adminModel.getResourceForDropdownModel();
             if (result.success) {
                 let dataResponse = {
                     status: "000",
@@ -501,18 +589,17 @@ var adminController= module.exports ={
             console.log('error get Resource data', err);
         }
     },
-    updateResouce: async function(req,res,next,params){
-        try{
-            params.myUserCode=req.userCode;
-            let result= await adminModel.updateResouceModel(params);
-            if(result.success){
-                let dataResponse={
-                    status:"000",
-                    message:result.message,
-                    responseData:{}
-                  }
+    addMenuVsRole: async function (req, res, next, params) {
+        try {
+            let result = await adminModel.addMenuVsRoleModel(params);
+            if (result.success) {
+                let dataResponse = {
+                    status: "000",
+                    message: result.message,
+                    responseData: {}
+                }
                 res.status(200).send(dataResponse)
-            }else{
+            } else {
                 let dataResponse = {
                     status: false,
                     message: result.message,
@@ -520,44 +607,22 @@ var adminController= module.exports ={
                 }
                 res.status(200).send(dataResponse)
             }
-        }catch(err){
-            console.log('create Role..',err);
-        }
-    },
-    addMenuVsRole:async function(req,res,next,params){
-        try{
-            let result=await adminModel.addMenuVsRoleModel(params);
-            if(result.success){
-                let dataResponse={
-                    status:"000",
-                    message:result.message,
-                    responseData:{}
-                  }
-                res.status(200).send(dataResponse)
-            }else{
-                let dataResponse = {
-                    status: false,
-                    message: result.message,
-                    responseData: {}
-                }
-                res.status(200).send(dataResponse)
-            }
-        }catch(err){
-            console.log("Add menuVsRole..",err);
+        } catch (err) {
+            console.log("Add menuVsRole..", err);
         }
     },
 
-    getMenuVsRole:async function (req,res,next,params){
-        try{
-            let result=await adminModel.getRoleVsMenuModel(params);
-            if(result.success){
-                let dataResponse={
-                    status:"000",
-                    message:result.message,
-                    responseData:result.data
-                  }
+    getMenuVsRole: async function (req, res, next, params) {
+        try {
+            let result = await adminModel.getRoleVsMenuModel(params);
+            if (result.success) {
+                let dataResponse = {
+                    status: "000",
+                    message: result.message,
+                    responseData: result.data
+                }
                 res.status(200).send(dataResponse)
-            }else{
+            } else {
                 let dataResponse = {
                     status: false,
                     message: result.message,
@@ -565,23 +630,23 @@ var adminController= module.exports ={
                 }
                 res.status(200).send(dataResponse)
             }
-        }catch(err){
-            console.log("getMenuVsRole ::",err)
+        } catch (err) {
+            console.log("getMenuVsRole ::", err)
         }
     },
 
-    updateMenuVsRole:async function (req,res,next,params){
-        try{
-            console.log('updateMenuVsRole ::::',params)
-            let result=await adminModel.updateMenuVsRoleModel(params);
-            if(result.success){
-                let dataResponse={
-                    status:"000",
-                    message:result.message,
-                    responseData:{}
-                  }
+    updateMenuVsRole: async function (req, res, next, params) {
+        try {
+            console.log('updateMenuVsRole ::::', params)
+            let result = await adminModel.updateMenuVsRoleModel(params);
+            if (result.success) {
+                let dataResponse = {
+                    status: "000",
+                    message: result.message,
+                    responseData: {}
+                }
                 res.status(200).send(dataResponse)
-            }else{
+            } else {
                 let dataResponse = {
                     status: false,
                     message: result.message,
@@ -589,13 +654,13 @@ var adminController= module.exports ={
                 }
                 res.status(200).send(dataResponse)
             }
-        }catch(err){
-            console.log("getMenuVsRole ::",err)
+        } catch (err) {
+            console.log("getMenuVsRole ::", err)
         }
     },
-    
 
-    roleWiseAllMenu: async function (req,res,next,params) {
+
+    roleWiseAllMenu: async function (req, res, next, params) {
         try {
             console.log('reqqqqqqqqquesttttt', req.roleCode);
             var params;

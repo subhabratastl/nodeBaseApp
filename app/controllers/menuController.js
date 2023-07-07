@@ -19,7 +19,6 @@ var menuController= module.exports ={
 
     createMenu:async function(req,res,next,params){
         try{
-            console.log("inside create Menu")
             let result = await menuModel.menuCreateModel(params);
             if(result.success){
                 let dataResponse={
@@ -43,10 +42,7 @@ var menuController= module.exports ={
 
     getAllMenu:async function(req,res,next,params){
         try{
-            console.log("get All Menu...@@@@@@@@@@2",params);
             let result=await menuModel.menuGetAllModel(params);
-
-            console.log('get ALL Menu...###########333',result);
 
             if(result.success){
                 let dataResponse={
@@ -89,6 +85,30 @@ var menuController= module.exports ={
 
         }catch(err){
             console.log('error update Menu..',err); 
+        }
+    },
+
+    getMenuDataForDropdown: async function (req, res, next) {
+        try {
+            
+            let result = await menuModel.getMenuDataForDropdownModel();
+            if (result.success) {
+                let dataResponse = {
+                    status: "000",
+                    message: result.message,
+                    responseData: result.data
+                }
+                res.status(200).send(dataResponse)
+            } else {
+                let dataResponse = {
+                    status: false,
+                    message: result.message,
+                    responseData: {}
+                }
+                res.status(200).send(dataResponse)
+            }
+        } catch (err) {
+            console.log("getMenuDataForDropdown ::", err)
         }
     }
 

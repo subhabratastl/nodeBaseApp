@@ -20,17 +20,17 @@ const router= require("express").Router();
   //router.post(["/updateUserDetails","/adminApi/updateUserDetails"],verifyToken,controller.intialUser);
   router.get(["/signout","/adminApi/signout"],verifyToken,controller.signout);
 
-  router.get(["/getAllRole","/adminApi/getAllRole"],verifyToken,controller.getAllRoles);
+  router.get(["/getRoles","/adminApi/getRoles"],verifyToken,controller.getRolesForDropdown);
   router.post(["/roleSetup","/adminApi/roleSetup"],verifyToken,controller.initialRole);
   router.post(["/updateUserStatus","/adminApi/updateUserStatus"],verifyToken,controller.activeDeactiveUser);
   router.post(["/updateRoleStatus","/adminApi/updateRoleStatus"],verifyToken,controller.activeDeactiveRole);
 
   router.get(["/getUsersCount","/adminApi/getUsersCount"],verifyToken,controller.getUsersCount);
   router.get(["/getGroupUsersCount","/adminApi/getGroupUsersCount"],verifyToken,controller.getGroupWiseUsersCount);
-  router.post(["/resource","/adminApi/resource"],verifyToken,controller.initialResource);
-  router.get(["/resource","/adminApi/resource"],verifyToken,controller.initialResource);
+  router.post(["/resourceSetup","/adminApi/resourceSetup"],verifyToken,controller.initialResource);
+  router.get(["/getResource","/adminApi/getResource"],verifyToken,controller.getResourceForDropdown);
 
- router.post(["/menuVsRole","/adminApi/menuVsRole"],verifyToken,controller.initalMenuVsRole);
+ router.post(["/roleToMenuMapping","/adminApi/roleToMenuMapping"],verifyToken,controller.initalMenuVsRole);
   
   
   module.exports=router;
