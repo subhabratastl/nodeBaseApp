@@ -48,7 +48,10 @@ var menuController= module.exports ={
                 let dataResponse={
                     status:"000",
                     message:result.message,
-                    responseData:result.data
+                    responseData:{
+                        data:result.data,
+                        num_rows:result.data[0].total_count
+                    }
                   }
                 res.status(200).send(dataResponse)
             }else{
